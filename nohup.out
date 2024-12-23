@@ -1,0 +1,8 @@
+Bot is starting...
+Traceback (most recent call last):
+  File "/mnt/d/Workspace/bot.py", line 78, in <module>
+    main()
+  File "/mnt/d/Workspace/bot.py", line 75, in main
+    application.idle()
+    ^^^^^^^^^^^^^^^^
+AttributeError: 'Application' object has no attribute 'idle'
