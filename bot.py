@@ -1,5 +1,6 @@
 from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes, MessageHandler, filters
+from youtubesearchpython import VideosSearch
 import os
 
 # Hàm xử lý lệnh /start
@@ -39,8 +40,10 @@ async def handle_keyword_message(update: Update, context: ContextTypes.DEFAULT_T
 
     elif "hello" in message_text:
         await update.message.reply_text("Chào bạn! Tôi là bot, có thể giúp gì cho bạn?")
+    
     elif "help" in message_text:
         await update.message.reply_text("Để sử dụng bot, bạn có thể dùng các lệnh: /start, /help...")
+    
     else:
         await update.message.reply_text(f"Bạn đã gửi: {update.message.text}")
 
@@ -52,6 +55,29 @@ async def cmd_add(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(f"Đã thêm: {item}")
     else:
         await update.message.reply_text("Vui lòng cung cấp thông tin để thêm sau \\cmd add.")
+
+# Hàm tìm kiếm video ngẫu nhiên trên YouTube
+def search_random_song():
+    query = "music"  # Tìm kiếm theo từ khóa "music" hoặc bạn có thể thay đổi thành từ khóa khác
+    search = VideosSearch(query, limit=50)  # Tìm kiếm 50 video
+    results = search.result()['videos']
+
+    if results:
+        # Chọn ngẫu nhiên một video trong danh sách kết quả
+        random_video = random.choice(results)
+        # Trả về URL của video
+        return f"https://www.youtube.com/watch?v={random_video['id']}"
+    return None
+
+# Hàm xử lý lệnh /music
+def music(update: Update, context: CallbackContext):
+    song_url = search_random_song()
+    if song_url:
+        update.message.reply_text(f"Here's a random song for you: {song_url}")
+    else:
+        update.message.reply_text("Sorry, I couldn't find a song at the moment.")
+
+
 
 def main():
     print("Bot is starting...")
@@ -70,6 +96,13 @@ def main():
 
     # Thêm MessageHandler cho các tin nhắn
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_keyword_message))
+
+    
+    # Lấy dispatcher để đăng ký các handler
+    dispatcher = updater.dispatcher
+
+    # Đăng ký lệnh /music
+    dispatcher.add_handler(CommandHandler("music", music))
 
     # Bắt đầu bot
     application.run_polling()
